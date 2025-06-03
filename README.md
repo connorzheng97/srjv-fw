@@ -26,21 +26,21 @@ The card itself does not include the standard ESP32 auto-flash circuitry so you 
 
 ### 1.11
 
-Add production test function to eliminate need for separate production test firmware 
+- Add production test function to eliminate need for separate production test firmware 
 
 ### 1.10
 
-Added AP channel selection function, changed default channel to 11
-Added AP hide SSID function
-Added show current value function for configuration dropdowns in HTML
+- Added AP channel selection function, changed default channel to 11
+- Added AP hide SSID function
+- Added show current value function for configuration dropdowns in HTML
 
 ### 1.00
 
-Fixed an issue where Apple devices are not supported in Bluetooth LE wakeup.
-Fixed an issue in HTML
-Fixed an issue where Bluetooth LE advertisement is sent once on boot, even if wireless mode is set to All Off
+- Fixed an issue where Apple devices are not supported in Bluetooth LE wakeup.
+- Fixed an issue in HTML
+- Fixed an issue where Bluetooth LE advertisement is sent once on boot, even if wireless mode is set to All Off
 
 ### 0.99
 
-Initial production version
-Bluetooth wakeup only supports Android phone.
+- Initial production version
+- Bluetooth wakeup only supports Android phone.
