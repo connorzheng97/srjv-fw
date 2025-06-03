@@ -18,7 +18,7 @@
 #include <Update.h>
 #include <webpages.h>
 
-#define FIRMWARE_VERSION "1.10 Release"
+#define FIRMWARE_VERSION "1.11 Release"
 
 #define LED_PIN 38
 #define BTN_PIN 39
@@ -120,7 +120,7 @@ void notFound(AsyncWebServerRequest *request) {
 }
 
 void handleUpdateEnd(AsyncWebServerRequest *request) {
-  
+
   if (Update.hasError()) {
     request->send(502, "text/plain", Update.errorString());
   } else {
@@ -150,10 +150,10 @@ void handleUpdate(AsyncWebServerRequest *request, String filename, size_t index,
     otaDone = 100 * Update.progress() / Update.size();
     Serial.print(".");
   }
-  
+
   if (final) {
     if (Update.end(true)) {
-      log_i("Update Success: %u bytes, Rebooting...", index+len);
+      log_i("Update Success: %u bytes, Rebooting...", index + len);
       xQueueSendToBack(blinkerQueue, (void *)&BLINK_NORMAL, 0);
     } else {
       log_e("%s", Update.errorString());
@@ -209,38 +209,29 @@ String processor(const String &var) {
     }
   } else if (var == "fw_ver") {
     return FIRMWARE_VERSION;
-  }
-   else if (var == "wifi_pwr_mode") {
-    if (wifi_pwr_mode == 0){
+  } else if (var == "wifi_pwr_mode") {
+    if (wifi_pwr_mode == 0) {
       return "On";
-    }
-    else if (wifi_pwr_mode == 1){
+    } else if (wifi_pwr_mode == 1) {
       return "Off with Bluetooth Wakeup";
-    }
-    else if (wifi_pwr_mode == 2){
+    } else if (wifi_pwr_mode == 2) {
       return "All Off (Only Button Wakeup)";
-    }
-    else{
+    } else {
       return String(wifi_pwr_mode);
     }
-    
-  }
-   else if (var == "ap_chan") {
+
+  } else if (var == "ap_chan") {
     return String(ap_chan);
-  }
-   else if (var == "ap_hidden") {
-    if (ap_hidden == 0){
+  } else if (var == "ap_hidden") {
+    if (ap_hidden == 0) {
       return "No";
-    }
-    else if (ap_hidden == 1){
+    } else if (ap_hidden == 1) {
       return "Yes";
+    } else {
+      return String(ap_hidden);
     }
-    else {
-    return String(ap_hidden);
-    }
-    
-  }
-  else {
+
+  } else {
     return String();
   }
 }
@@ -251,7 +242,7 @@ void handleUpload(AsyncWebServerRequest *request, String filename, size_t index,
     beforeProgramming();
   }
 
-  Serial.print("."); //to minimize serial output impact to speed, only print a dot every MTU
+  Serial.print(".");  //to minimize serial output impact to speed, only print a dot every MTU
 
   for (size_t i = 0; i < len; i++) {
     pgmData_t pgm_send_data;
@@ -277,14 +268,14 @@ void ARDUINO_ISR_ATTR onFlashExitBusy() {
 }
 
 bool eraseChip() {
-if (!in_progress) {
+  if (!in_progress) {
     log_e("Does not have control of interface!");
     return false;
   }
   state_change(STATE_ERASING);
   //xSemaphoreTake(flashExitBusySemaphore, 0);
   xQueueSendToBack(blinkerQueue, (void *)&BLINK_ON, 0);
-  cmdCycle(0x000, 0xF0); //reset command
+  cmdCycle(0x000, 0xF0);  //reset command
   log_i("Send chip erase command");
   cmdCycle(0xAAA, 0xAA);
   cmdCycle(0x555, 0x55);
@@ -324,12 +315,12 @@ void IRAM_ATTR cmdCycle(uint32_t cmd_addr, uint8_t cmd_data) {
   /*timerAlarm(timer, 2, false, 1); //use timer to delay
   while(xSemaphoreTake(timerSemaphore, 0) == pdFALSE){}*/
   //GPIO.out_w1tc = ((uint32_t)1 << CE_PIN); //set CE low
-  GPIO.out_w1tc = ((uint32_t)1 << WE_PIN); // set WE low
+  GPIO.out_w1tc = ((uint32_t)1 << WE_PIN);  // set WE low
   /*timerAlarm(timer, 2, false, 1);//use timer to delay
   while(xSemaphoreTake(timerSemaphore, 0) == pdFALSE){}*/
-  for (int i = 0; i < 3; i++) { __asm__ __volatile__("NOP"); } //use nop to delay
+  for (int i = 0; i < 3; i++) { __asm__ __volatile__("NOP"); }  //use nop to delay
   //for (int i=0;i<20;i++){__asm__ __volatile__ ("NOP");}// more delay
-  GPIO.out_w1ts = ((uint32_t)1 << WE_PIN); //set WE high
+  GPIO.out_w1ts = ((uint32_t)1 << WE_PIN);  //set WE high
   //GPIO.out_w1ts = ((uint32_t)1 << CE_PIN); //set CE high
   //for (int i=0;i<3;i++){__asm__ __volatile__ ("NOP");} //use nop to delay
   //for (int i=0;i<20;i++){__asm__ __volatile__ ("NOP");} // more delay
@@ -353,7 +344,7 @@ uint8_t readCycle(uint32_t addr) {
   return res;
 }
 
-bool beforeWriting(){
+bool beforeWriting() {
   if (!in_progress) {
     log_e("Does not have control of interface!");
     return false;
@@ -378,7 +369,7 @@ bool beforeWriting(){
   return true;
 }
 
-void beforeReading(){
+void beforeReading() {
   log_i("Setting data pins as INPUT");
   pinMode(D0, INPUT);
   pinMode(D1, INPUT);
@@ -445,7 +436,7 @@ void IRAM_ATTR programCycle(uint32_t addr, uint8_t data) {
 
 void IRAM_ATTR setAddr(uint32_t addr) {
   // 23 address bits, need to send 24
-  uint8_t buf[3]; // implied 32 bit to 8 bit conversion (cut)
+  uint8_t buf[3];  // implied 32 bit to 8 bit conversion (cut)
   buf[0] = addr;
   buf[1] = addr >> 8;
   buf[2] = addr >> 16;
@@ -458,7 +449,7 @@ void IRAM_ATTR setAddr(uint32_t addr) {
 
 void IRAM_ATTR setData(uint8_t data) {
   // 8 data bits
-  dedic_gpio_cpu_ll_write_all(data); //12ns?
+  dedic_gpio_cpu_ll_write_all(data);  //12ns?
   /*digitalWrite(D0, bitRead(data, 0));
   digitalWrite(D1, bitRead(data, 1));
   digitalWrite(D2, bitRead(data, 2));
@@ -541,7 +532,7 @@ void startWifi() {
     log_w("Wifi and server started");
     xQueueSendToBack(blinkerQueue, (void *)&BLINK_NORMAL, 0);
     BLEDevice::stopAdvertising();
-    BLEDevice::deinit(); //force bluetooth pairing request to fail
+    BLEDevice::deinit();  //force bluetooth pairing request to fail
   }
 }
 
@@ -584,6 +575,30 @@ void stopWifi() {
     BLEDevice::startAdvertising();
   }
   wifi_started = false;
+}
+
+void pt_write() {
+  log_i("Write production test data");
+  char pt_data[21] = { 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0xFE, 0xFD, 0xFB, 0xF7, 0xEF, 0xDF, 0xBF, 0x7F, 0x55, 0xAA, 0x33, 0xCC, 0x00 };
+  beforeProgramming();
+  vTaskDelay(1);
+  for (uint8_t j = 0; j < 4; j++) {
+    for (int i = 0; i < 21; i++) {
+      pgmData_t pgm_send_data;
+      pgm_send_data.addr = ((j << 21) | ((uint8_t)1 << i));
+      if (i < 20) {
+        pgm_send_data.data = pt_data[i];
+      } else {
+        pgm_send_data.data = j;
+      }
+      //log_i("%X %X", pgm_send_data.addr, pgm_send_data.data);
+      while (xQueueSendToBack(programBufferQueue, (void *)&pgm_send_data, 1) == errQUEUE_FULL) {};
+    }
+  }
+  vTaskDelay(10);
+  releaseControl();
+  state_change(STATE_PROGRAMMED);
+  xQueueSendToBack(blinkerQueue, (void *)&BLINK_NORMAL, 0);
 }
 
 void setup() {
@@ -743,7 +758,7 @@ void setup() {
     Serial.printf("%02X ", ap_name[i]);
   }
   Serial.println();*/
-  
+
 
   if (machine_state == STATE_ERASING || machine_state == STATE_PROGRAMMING) {
     state_change(STATE_UNKNOWN);
@@ -787,15 +802,13 @@ void setup() {
       wifi_pwr_mode = inputMessage.toInt();
       prefs.putUChar("wifi_pwr_mode", wifi_pwr_mode);
       prefs.end();
-    } 
-    else if (request->hasParam("ap_chan")) {
+    } else if (request->hasParam("ap_chan")) {
       inputMessage = request->getParam("ap_chan")->value();
       prefs.begin("cfg");
       ap_chan = inputMessage.toInt();
       prefs.putUChar("ap_chan", ap_chan);
       prefs.end();
-    }
-    else if (request->hasParam("ap_hidden")) {
+    } else if (request->hasParam("ap_hidden")) {
       inputMessage = request->getParam("ap_hidden")->value();
       prefs.begin("cfg");
       ap_hidden = inputMessage.toInt();
@@ -821,7 +834,11 @@ void setup() {
   });
   server.on(
     "/update", HTTP_POST, handleUpdateEnd, handleUpdate);
-  
+  server.on("/pt", HTTP_GET, [](AsyncWebServerRequest *request) {
+    pt_write();
+    request->send(200, "text/text", "ok");
+  });
+
   server.onFileUpload(handleUpload);
   server.onNotFound(notFound);
 
@@ -896,7 +913,7 @@ void housekeepingTask(void *pvParameters) {
               break;
             case ESP_SLEEP_WAKEUP_TIMER:
               wakeup_reason = "TIMER";
-              
+
               BLEDevice::startAdvertising();
               break;
             default:
